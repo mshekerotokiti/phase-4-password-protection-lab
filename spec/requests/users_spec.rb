@@ -5,7 +5,7 @@ RSpec.describe "Users", type: :request do
   describe 'POST /signup' do
     context 'with matching password confirmation' do
       let!(:user_params) { { name: 'Steven', password: 'un1verse', password_confirmation: 'un1verse' } }
-      
+
       it 'creates a new user' do
         expect { post '/signup', params: user_params }.to change(User, :count).by(1)
       end
@@ -15,13 +15,13 @@ RSpec.describe "Users", type: :request do
 
         expect(User.last.authenticate(user_params[:password])).to eq(User.last)
       end
-      
+
       it 'saves the user id in the session' do
         post '/signup', params: user_params
 
         expect(session[:user_id]).to eq(User.last.id)
       end
-      
+
       it 'returns the user as JSON' do
         post '/signup', params: user_params
 
@@ -45,7 +45,13 @@ RSpec.describe "Users", type: :request do
 
         expect(response).to have_http_status(:unprocessable_entity)
       end
-      
+
+      it 'returns a 401 unauthorized response when no user is logged in' do
+        get '/me'
+  
+        expect(response).to have_http_status(:unauthorized)
+      end
+
     end
   end
 
@@ -70,12 +76,6 @@ RSpec.describe "Users", type: :request do
         id: user2.id, username: user2.username
       })
     end
-
-    it 'returns a 401 unauthorized response when no user is logged in' do
-      get '/me'
-
-      expect(response).to have_http_status(:unauthorized)
-    end
   end
-  
+
 end
